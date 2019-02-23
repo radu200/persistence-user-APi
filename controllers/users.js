@@ -1,27 +1,12 @@
 const Users = require('../models/users.js')
-
-
-
-
-
-
-function validateUserId(userId, res) {
-  if(isNaN(userId)) {
-      res.status(500).json({
-          error: 'Invalid user ID supplied'
-      });
-      return false;
-  }
-  return true;
-}
+const validate = require('./validations.js')
 
 module.exports.homePage = async (req, res, next) => {
   res.render('index', {
     title: 'Persistence Layer'
   })
-
-
 }
+
 
 module.exports.getUsers = async (req, res, next) => {
 
@@ -32,54 +17,65 @@ module.exports.getUsers = async (req, res, next) => {
       res.json({
         msg: 'No users found'
       })
-      
-    return false;
+
+      return false;
 
     } else {
-        res.json({
-          Users: users
-        })
+      res.json({
+        Users: users
+      })
     }
   } catch (err) {
-    next(err)
+    res.json({
+      error: "Sorry an error occured while finding the user."
+    })
   }
 
 }
 
 module.exports.createUser = async (req, res, next) => {
 
-  const email = req.body.email;
-  const givenName = req.body.givenName;
-  const familyName = req.body.familyName;
+
+  const {
+   email,
+    givenName,
+    familyName
+  } = req.body
+
   const created = new Date();
+ 
+
+
 
   try {
-     await Users.CreateUser(email, givenName, familyName, created);
-    
-  
+    await Users.CreateUser(email, givenName, familyName, created);
+    res.json({
+      msg: 'user created'
+    })
   } catch (err) {
     res.status(500).json({
-      error: 'There was an issue updating this user',
-     });
+      error: 'There was an issue creating  this user',
+    });
 
   }
 
 }
 
 module.exports.getUserById = async (req, res, next) => {
-   
 
-  //i wrote req.params.id for testing purpose only
+
+
   const userId = req.params.id;
-  
-  if(!validateUserId(userId, res)) {
+
+  if (validate.validateUserId(userId, res)) {
     return;
-   }
-   
+  }
+
   try {
     const user = await Users.FindUserById(userId);
 
-    if (user[0].length === 0) {
+
+    if (user.length === 0) {
 
       res.json({
         msg: 'User not found'
@@ -87,15 +83,14 @@ module.exports.getUserById = async (req, res, next) => {
       return false;
 
     } else {
-        res.json({
-          User: user[0]
-        })
+      res.json({
+        User: user
+      })
     }
 
   } catch (err) {
-    // next(err)
     res.json({
-      err:error.message
+      error: "Sorry an error occured while finding the user."
     })
 
   }
@@ -105,15 +100,17 @@ module.exports.getUserById = async (req, res, next) => {
 
 module.exports.updateUser = async (req, res, next) => {
 
-  //i wrote req.params.id for testing purpose only
-  const userId = req.params.id;
-  const email = req.body.email;
-  const givenName = req.body.givenName;
-  const familyName = req.body.familyName;
 
-  if(!validateUserId(userId, res)) {
+  const userId = req.params.id;
+  const {
+    email,
+    givenName,
+    familyName
+  } = req.body
+
+  if (!validateUserId(userId, res)) {
     return;
-   }
+  }
 
 
   try {
@@ -123,8 +120,9 @@ module.exports.updateUser = async (req, res, next) => {
     })
 
   } catch (err) {
-    next(err)
-
+    res.status(500).json({
+      error: 'There was an issue updating this user',
+    });
   }
 
 }
@@ -132,12 +130,12 @@ module.exports.updateUser = async (req, res, next) => {
 
 module.exports.deleteUser = async (req, res, next) => {
 
-  //i wrote req.params.id for testing purpose only
+
   const userId = req.params.id;
 
-  if(!validateUserId(userId, res)) {
+  if (!validateUserId(userId, res)) {
     return;
-   }
+  }
 
   try {
     await Users.DeleteUser(userId);
@@ -146,7 +144,9 @@ module.exports.deleteUser = async (req, res, next) => {
     })
 
   } catch (err) {
-    next(err)
+    res.status(500).json({
+      error: 'There was an issue when deleteing user',
+    });
 
   }
 

@@ -37,9 +37,9 @@ const FindUserById = async(userId) => {
     try{
         const db = await connection;
         
-        const sql = await db.query('SELECT email, givenName,familyName,created FROM users WHERE  id = ?', [userId]);
+        const [user] = await db.query('SELECT email, givenName,familyName,created FROM users WHERE  id = ?', [userId]);
         
-        return sql
+        return user[0];
     
         } catch (err){
             console.log({msg:"Error occurred while executing FindUserById"}, err)
