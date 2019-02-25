@@ -73,10 +73,13 @@ const DeleteUser = async(userId) => {
       }
 }
 
+
 module.exports = {
     FindAll,
     CreateUser,
     FindUserById,
     UpdateUser,
-    DeleteUser
+    DeleteUser,
+    
+
 }

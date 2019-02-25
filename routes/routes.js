@@ -9,6 +9,4 @@ module.exports = (app) => {
    app.get('/user/:id', usersController.getUserById)
    app.put('/user/:id', usersController.updateUser)
    app.delete('/user/:id', usersController.deleteUser)
-
-
 }
