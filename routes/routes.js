@@ -4,7 +4,7 @@ module.exports = (app) => {
    
    
    app.get('/', usersController.homePage)
-   app.get('/user', usersController.getUsers)
+   app.get('/users', usersController.getUsers)
    app.post('/user', usersController.createUser)
    app.get('/user/:id', usersController.getUserById)
    app.put('/user/:id', usersController.updateUser)

@@ -7,3 +7,4 @@ Then run
 ### `node app.js` 
 
 As well you have to create database table and in config credentials put your db credentials.
+To consume api use tools like postman

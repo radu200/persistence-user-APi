@@ -2,9 +2,20 @@ const Users = require('../models/users.js')
 const validate = require('./validations.js')
 
 module.exports.homePage = async (req, res, next) => {
-  res.render('index', {
-    title: 'Persistence Layer'
-  })
+
+  try {
+    const users = await Users.FindAll();
+    res.render('index', {
+      title: 'Persistence Layer',
+      "users":users
+    })
+
+  } catch(err){
+    res.status(500).json({
+      msg: "Sorry an error occured while finding the users.",
+      error:err
+    })
+  }
 }
 
 
@@ -12,22 +23,14 @@ module.exports.getUsers = async (req, res, next) => {
 
   try {
     const users = await Users.FindAll();
-   
-    if (users.length === 0) {
-      res.json({
-        success:false,
-        code:404,
-        msg: 'No users found'
-      })
 
-
-    } else {
-      res.json({users})
-    }
+    res.json(users)
 
   } catch (err) {
+
     res.status(500).json({
-      error: "Sorry an error occured while finding the user."
+      msg: "Sorry an error occured while finding the users.",
+      error:err
     })
   }
 
@@ -37,23 +40,36 @@ module.exports.createUser = async (req, res, next) => {
 
 
   const {
-   email,
+    email,
     givenName,
     familyName
   } = req.body
 
   const created = new Date();
- 
+
 
 
 
   try {
-    await Users.CreateUser(email, givenName, familyName, created);
-    res.redirect('/user')
-  
+
+    if (email === '' || givenName === '' || familyName === '') {
+      return res.status(400).json({
+        msg: 'Please make sure you included a giveName, familyName and email'
+      });
+
+    } else {
+
+      const users =  await Users.CreateUser(email, givenName, familyName, created);
+      res.json({
+        msg: "User Added",
+
+      })
+    }
+
   } catch (err) {
     res.status(500).json({
-      error: 'There was an issue creating  this user.',
+      msg: 'There was an issue creating  this user.',
+      error:err
     });
   }
 
@@ -71,26 +87,12 @@ module.exports.getUserById = async (req, res, next) => {
 
   try {
     const user = await Users.FindUserById(userId);
-
-
-    if (user.length === 0) {
-
-      res.json({
-        success:false,
-        code:404,
-        msg: 'User not found'
-      })
-      return false;
-
-    } else {
-      res.json({
-        User: user
-      })
-    }
+    res.json(user)
 
   } catch (err) {
     res.json({
-      error: "Unable to find this user."
+      msg: "Unable to find this user.",
+      error:err
     })
 
   }
@@ -102,6 +104,7 @@ module.exports.updateUser = async (req, res, next) => {
 
 
   const userId = req.params.id;
+
   const {
     email,
     givenName,
@@ -114,13 +117,24 @@ module.exports.updateUser = async (req, res, next) => {
 
 
   try {
-   await Users.UpdateUser(userId, email, givenName, familyName);
-   
-   res.redirect('/user')
+
+    if (email === '' || givenName === '' || familyName === '') {
+      return res.status(400).json({
+        msg: 'Please make sure you included a giveName, familyName and email'
+      });
+
+    } else {
+
+      const user = await Users.UpdateUser(userId, email, givenName, familyName);
+      res.json({
+        msg: 'User updated'
+      })
+    }
 
   } catch (err) {
     res.status(500).json({
-      error: 'There was an issue updating this user',
+      msg: 'There was an issue updating this user',
+      error:err
     });
   }
 
@@ -138,18 +152,17 @@ module.exports.deleteUser = async (req, res, next) => {
 
   try {
     await Users.DeleteUser(userId);
-   
-    res.status(204).json({
+
+    res.json({
       msg: 'User information deleted succefully '
     })
 
   } catch (err) {
     res.status(500).json({
-      error: 'There was an issue when deleting user',
+      msg: 'There was an issue when deleting user',
+      error:err
     });
 
   }
 
 }
-
-
